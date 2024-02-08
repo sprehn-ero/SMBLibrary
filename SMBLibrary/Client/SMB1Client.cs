@@ -4,17 +4,17 @@
  * the GNU Lesser Public License as published by the Free Software Foundation,
  * either version 3 of the License, or (at your option) any later version.
  */
+using SMBLibrary.Authentication.NTLM;
+using SMBLibrary.Client.Authentication;
+using SMBLibrary.NetBios;
+using SMBLibrary.Services;
+using SMBLibrary.SMB1;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using SMBLibrary.Authentication.NTLM;
-using SMBLibrary.Client.Authentication;
-using SMBLibrary.NetBios;
-using SMBLibrary.Services;
-using SMBLibrary.SMB1;
 using Utilities;
 
 namespace SMBLibrary.Client
@@ -170,7 +170,8 @@ namespace SMBLibrary.Client
         {
             if (m_isConnected)
             {
-                m_clientSocket.Disconnect(false);
+                m_clientSocket.Shutdown(SocketShutdown.Both);
+                m_clientSocket.Close();
                 m_connectionState.ReceiveBuffer.Dispose();
                 m_isConnected = false;
                 m_userID = 0;
@@ -310,7 +311,7 @@ namespace SMBLibrary.Client
                 request.Capabilities = clientCapabilities;
                 request.SecurityBlob = negotiateMessage;
                 TrySendMessage(request);
-                
+
                 SMB1Message reply = WaitForMessage(CommandName.SMB_COM_SESSION_SETUP_ANDX);
                 if (reply != null)
                 {
